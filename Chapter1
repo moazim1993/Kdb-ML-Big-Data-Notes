@@ -1,0 +1,311 @@
+Chapter1) Fundamentals of the q Language
+ways to enlist:
+q)type enlist 2
+7h
+q)type 2,()
+7h
+Parsing Rule: Evaluates right-to-left
+q)10*100+1000
+11000
+
+? = Rand/find/conditional
+q) 10?5
+1 2 0 3 4 2 1 
+q) -5?10 // sample without replacements
+1 9 0 3 4
+q) -10?5 // attempting to generate more than the unique instances will return a 'lenght error
+'length
+q)\S // can seed the random number generator
+-314159
+q)arr:1 2 3 4 5 6
+q)arr?3  // returns the index of the first of that number in a list
+2
+q)arr?7 // if not in the list, will return 1+count[arr]
+?[boolSwitch;true;false] Will allow conditional expression to replace elements in a list
+q)inp1:1 2 3 4 5
+q)inp2:10 20 30 40 50
+q)boolSwitch:01010b;
+q)?[boolSwitch;inp1;inp2]
+10 2 30 4 50
+
+xbar = rounds each element of a vector on the right to the closest multiple of the number on the left
+q)5 xbar 2 -1 3 5 10 13 21
+0 -5 0 5 10 10 20
+Note: Convenient way to bucket a vector
+
+^ = Fill, fills in null values
+q)0^1 2 3 0N 5 6 0N 8
+
+# = Take/reshape
+q)3#1 2 3 4 5 6 // take first three items from vector
+1 2 3
+q)-3#1 2 3 4 5 6 // take from end of list
+4 5 6
+q)13#1 2 3 4 5 6 // list will repeat if you take more than than the list items
+1 2 3 4 5 6 1 2 3 4 5 6 1
+q)3 3#1 2 3 4 5 6 // # is also used to shape an array, 3x3 in this case
+1 2 3
+4 5 6
+1 2 3
+
+_ = Drop/Cut
+q)3_0 1 2 3 4 5 6 7 8 9 // used to drop a subset of a vector
+3 4 5 6 7 8 9
+q)-3_0 1 2 3 4 5 6 7 8 9 // -[int] drops from the end
+0 1 2 3 4 5 6
+q)0 1 2 3 4 5 6 7 8 9_3 // you can use it to cut from a list by placing the array on the left and the item to cut on the right
+0 1 2 4 5 6 7 8 9
+q)0 3 6_1 2 3 4 5 6 7 8 9 // can also use _ to partition a list into parts
+1 2 3
+4 5 6
+7 8 9
+
+| = Max/ Or / Reverse
+q)4|0 1 2 3 4 5 6 7 8 9 // will return the max of the number of the left to each item on the right
+4 4 4 4 4 5 6 7 8 9
+q)7 8 9|6 7 11  // if both left and right are same lenght max will be applied pairwise
+7 8 11
+q)1b|0b // can use min as Or, True or False = True
+q)(|) 9 8 7 11 // (|) can also be used to reverse the order of the list
+11 7 8 9
+q)(|) "hello world" // works on any type
+"dlrow olleh"
+
+& = Min/and
+q)4&0 1 2 3 4 5 6 7 8 9  // returns min of number on the left compared to each on the right
+0 1 2 3 4 4 4 4 4 4
+q)-1 5 -2 4 -3&0 1 2 3 4  // if two arrays of same size is on both sides it'll return the min element wise
+-1 1 -2 3 -3
+q)1 5 -2 4 -3&0 1 2 3  // when the sizes don't match it throws a 'length error
+'length
+q)1b&0b // can use min as boolian and, True and False = False
+0b
+
+where = where items are given a list
+q)where 0101b // the index 1 and 3 are true
+1 3
+q)where 0 1 2 3 // returns more than one if instead of Boolean a numbered list is given
+1 2 2 3 3 3
+q)where `a`b`c`d!0 1 2 3 // returns keys if given dict
+`b`c`c`d`d`d
+
+, = simple join
+q)(til 4),(5 6 7 8 9) // join two list
+0 1 2 3 5 6 7 8 9
+q)(til 4),`a,"hello" // can join any type
+0 1 2 3 `a "h" "e" "l" "l" "o"
+
+0N! = print console
+q)0N! "hello"; // can use as print
+"hello"
+q)1 + 0N!1 +0N!1+0N!1 // useful for evaluating complicated statements
+1
+2
+3
+4
+
+; = separator
+q)(1 2; 3 4) // ; can denote end of statement, but inside ( ; ) it separate items in a list
+1 2
+3 4
+
+@ = apply/Index
+q)max 1 2 3 = max@1 2 3 // equivalent of running a monadic function to a list
+1b
+q)x:(1 2 3;4 5 6;7 8 9) // takes the index at depth 
+q)x@1 2
+4 5 6
+7 8 9
+
+( ) = precedence / list
+q)1 + 2 * 3 + 4  // typically evaluated right to left
+15
+q)(1+2) * (3+4) // gives precedence to the operation inside the bracket
+21
+
+q)(((1;2);3);4;5)  // can also be used to nest lists or create them
+(1 2;3)
+4
+5
+
+raze = flatten or raze a list
+q)raze (((1;2);3);4;5)
+1 2
+3
+4
+5
+q)raze raze (((1;2);3);4;5) // takes the nested list and flattens it to a lower valance
+1 2 3 4 5
+
+[ ] = block
+q)[a:1;b:2; a+b]  // can block or group together multiple expression of code. Useful inside a conditional expression
+3
+
+: = assignee / amend
+q)a:1; a+:1;a //can assignee or update stored values
+2
+q){[name] : "hello ",name;}["Mo"] // can return an expression inside a function
+"hello Mo"
+
+- Difference between string and symbol
+    - Under the surface q maintains a pool of strings used as symbols and every usage of a symbol points to the value in this table. Whenever you need a use of a symbol repeatedly symbols are the right choice. Advantage of symbols is that comparisons are much faster, since the entire string is evaluated as a whole. If we have unique and complicated string we should stick to strings as to not blow up the memory.
+
+- Enumerations:
+         - underlying maps a discrete set to a list, where the values in the list are index of the distinct list its enumerated against. This then places the discrete enumerated list in memory and the index as the values and thereby increasing speed
+q)tickers // discrete list
+`IBM`BABA`AAPL`GOOG`TSLA
+q)type tickers
+11h
+q)list //bunch of values from tickers
+`TSLA`IBM`AAPL`BABA`AAPL`BABA`AAPL`GOOG`AAPL`TSLA`BABA`IBM`AAPL`TSLA`BABA`AAP..
+q)type list
+11h
+q)enumList:`tickers$list // how to enumerate
+q)type enumList // type for enumerated
+21h
+q)type enumList, `NewCompany // adding in values not from discrete list will undo enumeration
+11h
+q)type enumList, `BABA // will stay enumerated if values added are in discrete list
+11h
+
+flip = transpose, dictionary to table and vise versa
+For dictionaries with list values it can transpose it into a table and can transpose a table into a dictionary. Also transposes a matrix.
+
+
+q)type `a`b`c!(1;2;3)
+99h
+q)type flip `a`b`c!(1;2;3) // values need to be enlisted to be a table
+'rank
+q)type flip `a`b`c!(1 11;2 22;3 33)
+98h
+q)type flip flip `a`b`c!(1 11;2 22;3 33)
+99h
+q)a:(1 2 3; 4 5 6)
+q)a
+1 2 3
+4 5 6
+q)flip a
+1 4
+2 5
+3 6
+
+. = apply/Index
+similar to the @ function but for deeper levels
+
+q)a:(2.4 -0.7 20.4;5.7 9.8 -2.3)
+q)a
+2.4 -0.7 20.4
+5.7 9.8 -2.3
+q)a . 1 2
+-2.3
+q)a[1][2] ~ a . 1 2
+1b
+
+
+- Indexing:
+can use index number in [ind], and [level1;level2] for a matrix
+q)show a:(2.4 -0.7 20.4;5.7 9.8 -2.3)
+2.4 -0.7 20.4
+5.7 9.8 -2.3
+q).[a;1 2]
+-2.3
+q)a[1][2]
+-2.3
+q)a[1;2]
+-2.3
+q)a[1;2]:5.5
+q)a[1][2]:-2.3
+'assign
+q)a . 1 2:-2.3
+'type
+q)show .[a;1 2;:;-2.3]
+2.4 -0.7 20.4
+5.7 9.8 -2.3
+q)a @ 1
+5.7 9.8 5.5
+q)a @ 1 2
+5.7 9.8 5.5
+`float$()
+q)a @ 0 1
+2.4 -0.7 20.4
+5.7 9.8 5.5
+q)show a[;1]:1.4 -8.9
+1.4 -8.9
+q)show a
+2.4 1.4 20.4
+5.7 -8.9 5.5
+
+mmu or $ = matrix multiplication (will work on floating points)
+q)a
+2.4 1.4 20.4
+5.7 -8.9 5.5
+q)b
+2.4 10.8 2.6
+1.2 3.1 0.8
+q)a mmu flip b
+73.92 23.54
+-68.14 -16.35
+
+
+inv = inverse of a non singular matrix
+q)d:a mmu flip b
+q)inv d
+-0.04134806 -0.0595311
+0.1723215 0.1869388
+
+
+- Command line options
+$q -b // Block writing : to process error message nonupdated
+root@bbe0c7f5e31f:/# q -b -p 5555  //open port 5555 with -b option
+q)h:hopen `::5555
+q)h "a"
+1 2 3
+q)h "a:10 11 12"
+'noupdate: `. `a
+
+$q -c 100 200 // Console output: size (lenght, width)
+root@bbe0c7f5e31f:/# q -c 10 10
+KDB+ 3.3 2016.02.02 Copyright (C) 1993-2016 Kx Systems
+q)show "hey there hello"
+"hey th..
+
+$q -e (0|1|2) // ERROR Trap: 0 is for no error trap, 1 is to suspend if client query causes error, 2 returns error to client (not demo-able)
+root@bbe0c7f5e31f:/# q -e 1 -p 5555  // propcess is hanging in server side if client command causes error
+KDB+ 3.3 2016.02.02 Copyright (C) 1993-2016 Kx Systems
+q)broken:{x + string y}
+q){x + string y}
+'type
++
+12
+"34"
+q))
+
+$q -g (0|1) // Garbage Collection: 0 is deffered mode, returns memory when process is shut down or .Q.gc[] is ran. 1 actively returns memory to the process when process in slow.
+
+$q mainprocess -l // Log; Will create a binary log file
+
+$q -0 N // Offset: offset for GMT time. N < 23 will be in hours > 23 will be in minutes
+
+$q -p 5555 // Port: set process or a port
+
+$q -T N // Timeout: sets timeout timer for client quires. N is in seconds
+
+$q -s N // Multi-threading: number of cores dedicated to process for multi-threading
+
+$q -u Filename // User restriction; where the file is a set of username and passwords required to log into the kdb process
+
+$q -w N // Workspace: set workspace memory limit N for number of MBs
+
+$q -W N // Day of Week : N = 2 will set beginning of week to Monday, 1 is Sunday, 3 is Tuesday and etc. 
+root@bbe0c7f5e31f:~/test# q -W 1
+KDB+ 3.3 2016.02.02 Copyright (C) 1993-2016 Kx Systems
+q)`week$.z.D
+2021.08.29
+root@bbe0c7f5e31f:~/test# q -W 2
+KDB+ 3.3 2016.02.02 Copyright (C) 1993-2016 Kx Systems
+To remove this startup msg, edit q.q
+q)`week$.z.D
+2021.08.30
+
+$q -z (0|1) // Date format 0 sets US style MM/DD/YYYY, 1 sets European style DD/MM/YYYY
+

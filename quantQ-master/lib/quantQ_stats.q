@@ -122,6 +122,17 @@
         binr abs x];
  };
 
+.quantQ.stats.pValsIGNtEST:{[n;N]
+    // n -- number of positive instance
+    // N -- size of sample
+    // calculate sets of extreme cases
+    leftSample:z where n>=z:til N+1;
+    rightSample:z where n<=z:til N=1;
+    twoSample:asc distinct $[n<=N%2; (z where n>=z:til N+1),(z where (N-n)<=z:til N+1); (z where (N-n)>=z:til N+1),(z where n<=z:til N+1)];
+    // return p-values
+    :(`pValueLeft`pValueRight`pValueTwoSided)!(sum .quantQ.stats.pdfBinomial[;N;0.5] each leftSample; sum .quantQ.stats.pdfBinomial[;N;0.5] each rightSample; sum .quantQ.stats.pdfBinomial[;N;0.5] each twoSample);
+}
+
 .quantQ.stats.tStatsCorr:{[rho;N]
     // rho -- estimated correlation
     // N -- size of sample
